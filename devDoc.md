@@ -14,3 +14,47 @@
 
 —————
 用户端完全独立，不设置权限。
+
+
+#### 前端调用方式
+
+我们做了一个JWT的认证模块:
+(access token在以下代码中为'token'，refresh token在代码中为'rftoken')
+
+首次认证
+client -----用户名密码-----------> server
+
+client <------token、rftoken----- server
+
+access token存续期内的请求
+client ------请求（携带token）----> server
+
+client <-----结果----------------- server
+
+access token超时
+client ------请求（携带token）----> server
+
+client <-----msg:token expired--- server
+
+重新申请access token
+client -请求新token（携带rftoken）-> server
+
+client <-----新token-------------- server
+
+rftoken token超时
+client -请求新token（携带rftoken）-> server
+
+client <----msg:rftoken expired--- server
+
+
+大致是这样的，用的是jwt，登录后我会给个token,之后就用token请求
+
+当token过期时，请求将返回401错误，并返回token expired信息，这时需要前端用rftoken请求新的token，服务端返回新的token之后，前端继续之前的用户请求
+
+关于token的使用参考： https://ninghao.net/blog/5530
+
+这里不同之处在于多加了一个rftoken，用于在token过期时请求新的token，不需要用户重新登录
+
+如果用户登出，那就丢弃已存储的token和rftoken
+
+用户长时间未操作，判断用户登出，参考：  https://blog.csdn.net/xiaoshihoukediaole/article/details/81327471
